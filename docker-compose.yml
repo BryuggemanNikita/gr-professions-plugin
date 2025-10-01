@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  mc-server:
+    image: purpur/purpur:1.21.5
+    ports:
+      - "25565:25565"
+    volumes:
+      - ./server:/data
+    environment:
+      EULA: "TRUE"
+      MEMORY: "4G"
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:

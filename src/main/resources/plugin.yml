@@ -1,0 +1,15 @@
+name: RPG-Professions
+version: 1.0.0
+main: org.owleebr.professions.Main
+api-version: 1.21
+authors: [OwleeBr]
+description: "Плагин работы с профессиями"
+depend: [ProtocolLib]
+
+
+commands:
+
+permissions:
+  rpg.profession.set:
+    description: "Allows setting professions"
+    default: op
