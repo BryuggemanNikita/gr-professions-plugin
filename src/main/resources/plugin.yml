@@ -4,10 +4,16 @@ main: org.owleebr.professions.Main
 api-version: 1.21
 authors: [OwleeBr]
 description: "Плагин работы с профессиями"
-depend: [ProtocolLib]
+#depend: [ProtocolLib]
 
 
 commands:
+    cinv:
+        description: Открывает CINV
+        usage: /cinv
+    getforceps:
+        description: Выдает щипцы
+        usage: /getforceps
 
 permissions:
   rpg.profession.set:

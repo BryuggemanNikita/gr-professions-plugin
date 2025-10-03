@@ -2,6 +2,7 @@ plugins {
     id("java-library")
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
     id("checkstyle")
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
 group = "org.owleebr"
@@ -24,7 +25,17 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
-    compileOnly("com.github.dmulloy2:ProtocolLib:5.3.0") // Replace `dev` with correct version once available
+    //compileOnly("com.github.dmulloy2:ProtocolLib:5.3.0") // Replace `dev` with correct version once available
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
+    implementation("com.mojang:authlib:1.5.25")
+
+    implementation("org.reflections:reflections:0.10.2")
+    implementation("com.jeff-media:custom-block-data:2.2.4")
+    implementation("com.jeff-media:MorePersistentDataTypes:2.4.0")
+
+
 
 }
 
