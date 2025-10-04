@@ -113,5 +113,12 @@ public class IngotMold extends FuncBlock {
         }
     }
 
+    @Override
+    public void onRemove(ItemStack itemStack) {
+        if (output != null){
+            BlockLocation.getWorld().dropItemNaturally(BlockLocation, output);
+        }
+    }
+
 
 }

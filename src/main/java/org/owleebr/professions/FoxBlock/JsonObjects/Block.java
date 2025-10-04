@@ -66,6 +66,8 @@ public class Block {
             BlockPlaceUtil.Place8Block(location, Direction);
         }else if (Size.equals("12")){
             BlockPlaceUtil.Place12Block(location, Direction);
+        }else if (Size.equals("13")){
+            BlockPlaceUtil.Place13Block(location, Direction);
         }else if (Size.equals("2up")){
             BlockPlaceUtil.Place2BlockUp(location);
         }

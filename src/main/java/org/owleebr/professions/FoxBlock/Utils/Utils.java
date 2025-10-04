@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.owleebr.professions.FoxCore.Utils.MathUtils;
 
 public class Utils {
 
@@ -68,6 +69,23 @@ public class Utils {
                 }
             }
         }
+        return true;
+    }
+
+    public static Boolean checkSpace13Block(Block block, String Face){
+        Vector frame = DIR.get(Face);
+        for (int dx = 0; dx <= 1 + Math.abs(DIR2.get(Face).getX()); dx++) {
+            for (int dy = 0; dy <= 1; dy++) {
+                for (int dz = 0; dz <= 1 + Math.abs(DIR2.get(Face).getX()); dz++) {
+                    Block blockc = block.getLocation().clone().add(frame.clone().setX(frame.getX() * dx).setY(frame.getY() * dy).setZ(frame.getZ() * dz)).getBlock();
+                    if (blockc.equals(block)) {continue;}
+                    if (blockc.getType() != Material.AIR){return false;}
+                }
+            }
+        }
+        Vector v = MathUtils.moveVector(new Vector(), 1, 0, Face);
+        Block blockc = block.getLocation().clone().add(DIR2.get(Face)).add(0, 2, 0).add(v).getBlock();
+        if (blockc.getType() != Material.AIR){return false;}
         return true;
     }
 

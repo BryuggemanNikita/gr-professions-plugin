@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 
@@ -27,5 +28,17 @@ public class ItemUtils {
            }
         });
         return head;
+    }
+
+    public static void damageItem(ItemStack item, int damage, boolean destroy){
+        item.editMeta(m ->{
+            if (m instanceof Damageable dmg){
+                int newDamage = Math.min(dmg.getDamage() + damage, item.getType().getMaxDurability());
+                dmg.setDamage(newDamage);
+                if (destroy && newDamage >= item.getType().getMaxDurability()){
+                    item.setType(Material.AIR);
+                }
+            }
+        });
     }
 }

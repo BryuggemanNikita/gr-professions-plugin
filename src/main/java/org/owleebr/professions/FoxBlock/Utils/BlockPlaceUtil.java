@@ -14,6 +14,7 @@ import org.bukkit.block.data.type.Campfire;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.owleebr.professions.FoxBlock.Const.Keys;
+import org.owleebr.professions.FoxCore.Utils.MathUtils;
 import org.owleebr.professions.Main;
 
 public class BlockPlaceUtil {
@@ -127,6 +128,8 @@ public class BlockPlaceUtil {
         data1.set(Keys.MainBlock, DataType.LOCATION, location);
     }
 
+
+
     public static void Place12Block(Location location, String Direction) {
         if (!Utils.checkSpace12Block(location.getBlock(), Direction)){return;}
         List<Location> locations = new ArrayList<>();
@@ -142,6 +145,35 @@ public class BlockPlaceUtil {
                 }
             }
         }
+
+
+        CustomBlockData data1 = new CustomBlockData(location.getBlock(), Main.getInstance());
+        data1.set(Keys.Blocks, DataType.asList(DataType.LOCATION), locations);
+        data1.set(Keys.MainBlock, DataType.LOCATION, location);
+    }
+
+    public static void Place13Block(Location location, String Direction) {
+        if (!Utils.checkSpace13Block(location.getBlock(), Direction)){return;}
+        List<Location> locations = new ArrayList<>();
+        Vector frame = DIR.get(Direction).clone();
+        for (int dx = 0; dx <= 1 + Math.abs(DIR2.get(Direction).getX()); dx++) {
+            for (int dy = 0; dy <= 1; dy++) {
+                for (int dz = 0; dz <= 1 + Math.abs(DIR2.get(Direction).getZ()); dz++) {
+                    Block block = location.clone().add(frame.clone().setX(frame.getX() * dx).setY(frame.getY() * dy).setZ(frame.getZ() * dz)).getBlock();
+                    block.setType(Material.RED_SHULKER_BOX);
+                    CustomBlockData data = new CustomBlockData(block, Main.getInstance());
+                    data.set(Keys.MainBlock, DataType.LOCATION, location);
+                    locations.add(block.getLocation());
+                }
+            }
+        }
+
+        Vector v = MathUtils.moveVector(new Vector(), 1, 0, Direction);
+        Block block = location.clone().add(DIR2.get(Direction)).add(0, 2, 0).add(v).getBlock();
+        block.setType(Material.RED_SHULKER_BOX);
+        CustomBlockData data = new CustomBlockData(block, Main.getInstance());
+        data.set(Keys.MainBlock, DataType.LOCATION, location);
+        locations.add(block.getLocation());
 
 
         CustomBlockData data1 = new CustomBlockData(location.getBlock(), Main.getInstance());

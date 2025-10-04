@@ -36,6 +36,7 @@ import java.util.Map;
 @ABlock(name = "Crucible")
 public class Crucible extends FuncBlock {
    List<Player> hovered = new ArrayList<>();
+   Map<Player, List<Integer>> displays = new HashMap<>();
 
     Location BlockLocation;
     public List<ItemStack> inventory = new ArrayList<>();
@@ -65,6 +66,7 @@ public class Crucible extends FuncBlock {
                             }
                             inventory.clear();
                             data.set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), inventory);
+                            UpdateDisplays();
                         }
         }
     }
@@ -83,12 +85,14 @@ public class Crucible extends FuncBlock {
                             inventory.add(itemm.getItemStack());
                             itemm.remove();
                             data.set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), inventory);
+                            UpdateDisplays();
                         }        else if (inventory.getLast().isSimilar(itemm.getItemStack())){
                             ItemStack lasItem = inventory.getLast();
                             inventory.remove(lasItem);
                             lasItem.setAmount(lasItem.getAmount() + itemm.getItemStack().getAmount());
                             inventory.add(lasItem);
                             itemm.remove();
+                            UpdateDisplays();
                         }
                     }
                 }
@@ -116,7 +120,16 @@ public class Crucible extends FuncBlock {
             m.getPersistentDataContainer().set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), inventory);
         });
         if (!hovered.isEmpty()){
+            for (Player player : hovered) {
+                if (displays.containsKey(player)){
+                    List<Integer> IDs = displays.get(player);
+                    for (Integer ID : IDs){
+                        SendPackets.stopVision(ID, player);
+                    }
+                }
+            }
             hovered.clear();
+            displays.clear();
         }
     }
 
@@ -126,45 +139,69 @@ public class Crucible extends FuncBlock {
 
         String face = GameUtils.getFacingDirection(player);
         Location loc = BlockLocation.clone().add(0.5, 1.5, 0.5);
-        int i = 0;
+
         Vector v = MathUtils.moveVector(new Vector(), 0, -0.5f, face);
-        BukkitRunnable runnable = new BukkitRunnable() {
-            final List<Integer> IDs = new ArrayList<>();
-
-            @Override
-            public void run() {
-                if (!hovered.contains(player)) {
-                    for (Integer i : IDs){
-                        SendPackets.stopVision(i, player);
-                    }
-                    this.cancel();
-                    return;
-                }
-                for (Integer i : IDs){
-                    SendPackets.stopVision(i, player);
-                }
-
-                for (ItemStack item : inventory) {
-                    int z = i;
-                    Vector v2 = v.clone();
-                    if (i >= 2){
-                        v2.setY(v2.getY() - 0.5);
-                        z -= 2;
-                    }
-                    v2 = MathUtils.moveVector(v2, 0, z*0.8f, face);
-                    int ID1 = SendPackets.showItemDisplay(player, loc.clone().add(v2), item, false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
-                    int ID2 = SendPackets.showTextDisplay(player, loc.clone().add(v2).subtract(0, 0.3, 0), "" + item.getAmount(), false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
-                    IDs.add(ID1);
-                    IDs.add(ID2);
-                }
+        final List<Integer> IDs = new ArrayList<>();
+        int i = 0;
+        for (ItemStack item : inventory) {
+            int z = i;
+            Vector v2 = v.clone();
+            if (i >= 2){
+                v2.setY(v2.getY() - 0.5);
+                z -= 2;
             }
-        };
-        runnable.runTaskTimer(Main.getInstance(), 0, 2);
+            v2 = MathUtils.moveVector(v2, 0, z*0.8f, face);
+            int ID1 = SendPackets.showItemDisplay(player, loc.clone().add(v2), item, false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+            int ID2 = SendPackets.showTextDisplay(player, loc.clone().add(v2).subtract(0, 0.3, 0), "" + item.getAmount(), false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+            IDs.add(ID1);
+            IDs.add(ID2);
+            i++;
+        }
+        displays.put(player, IDs);
     }
 
     @Override
     public void StopHoveredBlock(Player player){
+        if (displays.containsKey(player)){
+            List<Integer> IDs = displays.get(player);
+            for (Integer ID : IDs){
+                SendPackets.stopVision(ID, player);
+            }
+        }
         hovered.remove(player);
+    }
+
+    public void UpdateDisplays(){
+        for (Player player : hovered) {
+            if (!displays.containsKey(player)) {return;}
+            List<Integer> IDs = displays.get(player);
+            displays.remove(player);
+            for (Integer ID : IDs){
+                SendPackets.stopVision(ID, player);
+            }
+            IDs.clear();
+            String face = GameUtils.getFacingDirection(player);
+            Location loc = BlockLocation.clone().add(0.5, 1.5, 0.5);
+            int i = 0;
+            Vector v = MathUtils.moveVector(new Vector(), 0, -0.5f, face);
+            for (ItemStack item : inventory) {
+                int z = i;
+                Vector v2 = v.clone();
+                if (i >= 2){
+                    v2.setY(v2.getY() - 0.5);
+                    z -= 2;
+                }
+                v2 = MathUtils.moveVector(v2, 0, z*0.8f, face);
+                int ID1 = SendPackets.showItemDisplay(player, loc.clone().add(v2), item, false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+                int ID2 = SendPackets.showTextDisplay(player, loc.clone().add(v2).subtract(0, 0.3, 0), "" + item.getAmount(), false, new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+                IDs.add(ID1);
+                IDs.add(ID2);
+                i++;
+            }
+            if (!IDs.isEmpty()){
+                displays.put(player, IDs);
+            }
+        }
     }
 
 

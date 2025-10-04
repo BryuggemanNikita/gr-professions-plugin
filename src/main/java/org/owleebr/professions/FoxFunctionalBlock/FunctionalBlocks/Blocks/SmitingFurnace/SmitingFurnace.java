@@ -6,22 +6,24 @@ import com.mojang.math.Transformation;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.owleebr.professions.Const.Keys;
-import org.owleebr.professions.FoxBlock.Utils.Utils;
 import org.owleebr.professions.FoxCore.Utils.GameUtils;
+import org.owleebr.professions.FoxCore.Utils.ItemUtils;
 import org.owleebr.professions.FoxCore.Utils.MathUtils;
 import org.owleebr.professions.FoxFunctionalBlock.FunctionalBlocks.Annotations.ABlock;
 import org.owleebr.professions.FoxFunctionalBlock.FunctionalBlocks.Blocks.FuncBlock;
@@ -29,13 +31,18 @@ import org.owleebr.professions.FoxFunctionalBlock.FunctionalBlocks.Blocks.Smitin
 import org.owleebr.professions.JsonObjects.Recipe;
 import org.owleebr.professions.Main;
 import org.owleebr.professions.NMS.SendPackets;
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static org.owleebr.professions.FoxBlock.Utils.Utils.DIR2;
 
 @ABlock(name = "Smiting_furnace")
 public class SmitingFurnace extends FuncBlock {
     List<Player> hovered = new ArrayList<>();
+    Map<Player, List<Integer>> displays = new HashMap<>();
     Location BlockLocation;
 
     @Getter
@@ -53,6 +60,9 @@ public class SmitingFurnace extends FuncBlock {
     int burnTime = Main.getInstance().getConfig().getInt("burnTime");; //время горения топлива
     int minBurnTemp = Main.getInstance().getConfig().getInt("minBurnTemp"); //минимальная температура печи
     int CoolingTime = Main.getInstance().getConfig().getInt("CoolingTime"); //время остывания печи
+
+    int SoundTime = 250;
+    int SmokeTime = 50;
 
 
     public SmitingFurnace(Location location) {
@@ -92,6 +102,8 @@ public class SmitingFurnace extends FuncBlock {
                         Crucible = null;
                         CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                         data.remove(FurKeys.CrucibleFur);
+                    }else {
+                        player.damage(3);
                     }
                 }
             }
@@ -104,6 +116,7 @@ public class SmitingFurnace extends FuncBlock {
                         player.setItemInHand(itm);
                         CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                         data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                        UpdateDisplays();
                     }else {
                         int Amount = player.getItemInHand().getAmount();
                         if (Amount - 1 > 0){
@@ -118,6 +131,7 @@ public class SmitingFurnace extends FuncBlock {
                         Fuel.setAmount(1);
                         CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                         data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                        UpdateDisplays();
                     }
                 }else if(Fuel.isSimilar(player.getItemInHand())){
                     int MaxAmount = Fuel.getType().getMaxStackSize();
@@ -131,11 +145,13 @@ public class SmitingFurnace extends FuncBlock {
                             Fuel.setAmount(Amount);
                             CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                             data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                            UpdateDisplays();
                         }else {
                             Fuel.setAmount(Amount);
                             player.setItemInHand(new ItemStack(Material.AIR));
                             CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                             data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                            UpdateDisplays();
                         }
                     }else {
                         if (Fuel.getAmount() + 1 <= MaxAmount) {
@@ -151,6 +167,7 @@ public class SmitingFurnace extends FuncBlock {
                             Fuel.setAmount(Fuel.getAmount() + 1);
                             CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                             data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                            UpdateDisplays();
                         }
                     }
                 }
@@ -164,6 +181,8 @@ public class SmitingFurnace extends FuncBlock {
             }else if (player.getItemInHand().getType().equals(Material.FLINT_AND_STEEL)) {
                 if (Fuel != null) {
                     isLit = true;
+                    player.playSound(player, Sound.ITEM_FLINTANDSTEEL_USE, 1, 1);
+                    ItemUtils.damageItem(player.getItemInHand(), 1, true);
                 }
             }else if (player.getItemInHand().getPersistentDataContainer().has(Keys.forceps)){
                 if (Crucible != null) {
@@ -209,7 +228,23 @@ public class SmitingFurnace extends FuncBlock {
     @Override
     public void onRemove(ItemStack stack) {
         if (!hovered.isEmpty()){
+            if (hovered != null){
+                for (Player player : hovered) {
+                    if (displays.containsKey(player)){
+                        List<Integer> IDs = displays.get(player);
+                        for (Integer ID : IDs){
+                            SendPackets.stopVision(ID, player);
+                        }
+                    }
+                }
+            }
             hovered.clear();
+        }
+        if (Fuel != null){
+            BlockLocation.getWorld().dropItemNaturally(BlockLocation, Fuel);
+        }
+        if (Crucible != null){
+            BlockLocation.getWorld().dropItemNaturally(BlockLocation, Crucible);
         }
     }
 
@@ -225,11 +260,13 @@ public class SmitingFurnace extends FuncBlock {
                         amount = amount - 1;
                         Fuel.setAmount(amount);
                         CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
-                        data.set(FurKeys.CrucibleFur, DataType.ITEM_STACK, Crucible);
+                        data.set(FurKeys.Fuel, DataType.ITEM_STACK, Fuel);
+                        UpdateDisplays();
                     }else {
                         Fuel = null;
                         CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                         data.remove(FurKeys.Fuel);
+                        UpdateDisplays();
                     }
                     burnTime = 500;
                 }
@@ -276,6 +313,24 @@ public class SmitingFurnace extends FuncBlock {
                     }
                 }
             }
+            if (SoundTime == 0){
+                SoundTime = 250;
+                Bukkit.getScheduler().runTask(Main.getInstance(), () ->{
+                    BlockLocation.getWorld().playSound(BlockLocation, Sound.BLOCK_BLASTFURNACE_FIRE_CRACKLE, 2, 0);
+                });
+            }else {
+                SoundTime--;
+            }
+            Random rnd = new Random();
+            int chance = rnd.nextInt(100);
+            if (chance > 50){
+                int count = rnd.nextInt(3) + 1;
+                Vector v = MathUtils.moveVector(new Vector(), -1f, -0.5f, face);
+                Bukkit.getScheduler().runTask(Main.getInstance(), () ->{
+                    BlockLocation.getWorld().spawnParticle(Particle.FLAME, BlockLocation.clone().add(DIR2.get(face)).add(0, 1, 0).add(v), count, 0.125, 0.0625, 0.125, 0.01);
+                });
+
+            }
         }else {
             if (Temp > 0){
                 Temp = 0;
@@ -287,38 +342,50 @@ public class SmitingFurnace extends FuncBlock {
     public void HoveredBlock(Player player){
         hovered.add(player);
         int i = 0;
-        Location blockDisplay = BlockLocation.clone().add(Utils.DIR2.get(face)).add(0.5, 0.5, 0.5);
-        BukkitRunnable runnable = new BukkitRunnable() {
-            final List<Integer> IDs = new ArrayList<>();
+        Location blockDisplay = BlockLocation.clone().add(DIR2.get(face)).add(0.5, 0.5, 0.5);
+        final List<Integer> IDs = new ArrayList<>();
+        if (Fuel != null){
+            Vector v = MathUtils.moveVector(new Vector(), -0.6f, 0, face);
+            Quaternionf rotation = MathUtils.rotateWithQuaternion(face);
+            int ID1 = SendPackets.showItemDisplay(player, blockDisplay.clone().add(v).add(0, 0.2, 0), Fuel, true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+            int ID2 = SendPackets.showTextDisplay(player, blockDisplay.clone().add(v).subtract(0, 0.4, 0), "" + Fuel.getAmount(), true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+            IDs.add(ID1);
+            IDs.add(ID2);
+        }
+        displays.put(player, IDs);
+    }
 
-            @Override
-            public void run() {
-                if (!hovered.contains(player)) {
-                    for (Integer i : IDs){
-                        SendPackets.stopVision(i, player);
-                    }
-                    this.cancel();
-                    return;
-                }
-                for (Integer i : IDs){
-                    SendPackets.stopVision(i, player);
-                }
-                if (Fuel != null){
-                    Vector v = MathUtils.moveVector(new Vector(), -0.6f, 0, face);
-                    Quaternionf rotation = MathUtils.rotateWithQuaternion(face);
-                    int ID1 = SendPackets.showItemDisplay(player, blockDisplay.clone().add(v).add(0, 0.2, 0), Fuel, true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
-                    int ID2 = SendPackets.showTextDisplay(player, blockDisplay.clone().add(v).subtract(0, 0.4, 0), "" + Fuel.getAmount(), true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
-                    IDs.add(ID1);
-                    IDs.add(ID2);
-                }
-
+    public void UpdateDisplays(){
+        for (Player player : hovered) {
+            if (!displays.containsKey(player)) {return;}
+            List<Integer> IDs = displays.get(player);
+            displays.remove(player);
+            for (Integer ID : IDs){
+                SendPackets.stopVision(ID, player);
             }
-        };
-        runnable.runTaskTimer(Main.getInstance(), 0, 2);
+            Location blockDisplay = BlockLocation.clone().add(DIR2.get(face)).add(0.5, 0.5, 0.5);
+            IDs.clear();
+            if (Fuel != null){
+                Vector v = MathUtils.moveVector(new Vector(), -0.6f, 0, face);
+                Quaternionf rotation = MathUtils.rotateWithQuaternion(face);
+                int ID1 = SendPackets.showItemDisplay(player, blockDisplay.clone().add(v).add(0, 0.2, 0), Fuel, true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+                int ID2 = SendPackets.showTextDisplay(player, blockDisplay.clone().add(v).subtract(0, 0.4, 0), "" + Fuel.getAmount(), true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+                IDs.add(ID1);
+                IDs.add(ID2);
+            }
+            displays.put(player, IDs);
+
+        }
     }
 
     @Override
     public void StopHoveredBlock(Player player){
+        if (displays.containsKey(player)){
+            List<Integer> IDs = displays.get(player);
+            for (Integer ID : IDs){
+                SendPackets.stopVision(ID, player);
+            }
+        }
         hovered.remove(player);
     }
 
