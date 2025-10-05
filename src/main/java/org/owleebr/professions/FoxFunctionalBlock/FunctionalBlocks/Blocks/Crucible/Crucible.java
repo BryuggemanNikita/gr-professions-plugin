@@ -86,12 +86,17 @@ public class Crucible extends FuncBlock {
                             itemm.remove();
                             data.set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), inventory);
                             UpdateDisplays();
-                        }        else if (inventory.getLast().isSimilar(itemm.getItemStack())){
+                        }  else if (inventory.getLast().isSimilar(itemm.getItemStack())){
                             ItemStack lasItem = inventory.getLast();
                             inventory.remove(lasItem);
                             lasItem.setAmount(lasItem.getAmount() + itemm.getItemStack().getAmount());
                             inventory.add(lasItem);
                             itemm.remove();
+                            UpdateDisplays();
+                        }else if (inventory.size() < 4){
+                            inventory.add(itemm.getItemStack());
+                            itemm.remove();
+                            data.set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), inventory);
                             UpdateDisplays();
                         }
                     }
