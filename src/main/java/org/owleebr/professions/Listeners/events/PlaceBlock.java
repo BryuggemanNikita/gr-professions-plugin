@@ -21,13 +21,17 @@ public class PlaceBlock implements Listener {
         if (item.getPersistentDataContainer().has(Keys.Block)){
             String block = item.getPersistentDataContainer().get(Keys.Block, PersistentDataType.STRING);
             Block block1 = Main.blockList.get(block);
-            String size = block1.Size;
+            String size = block1.SizeBlock;
             if (size.equals("2")){
                 if (!Utils.checkSpace2Block(event.getBlock(), GameUtils.getFacingDirection(event.getPlayer()))){event.setCancelled(true); return;};
             }else if (size.equals("3")){
                 if (!Utils.checkSpace4Block(event.getBlock(), GameUtils.getFacingDirection(event.getPlayer()))){event.setCancelled(true); return;};
             }else if (size.equals("8")){
                 if (!Utils.checkSpace8Block(event.getBlock(), GameUtils.getFacingDirection(event.getPlayer()))){event.setCancelled(true); return;};
+            }else if (size.equals("12")){
+                if (!Utils.checkSpace12Block(event.getBlock(), GameUtils.getFacingDirection(event.getPlayer()))){event.setCancelled(true); return;};
+            }else if (size.equals("13")){
+                if (!Utils.checkSpace13Block(event.getBlock(), GameUtils.getFacingDirection(event.getPlayer()))){event.setCancelled(true); return;};
             }else if (size.equals("2up")){
                 if (!event.getBlock().getLocation().add(0, 1, 0).getBlock().getType().equals(Material.AIR)){event.setCancelled(true); return;};
             }

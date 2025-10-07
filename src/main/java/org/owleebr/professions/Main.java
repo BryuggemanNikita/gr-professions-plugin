@@ -6,7 +6,6 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.owleebr.professions.Annotations.AFile;
 import org.owleebr.professions.Annotations.AJFile;
@@ -16,7 +15,10 @@ import org.owleebr.professions.FoxCore.GUIUtils.InventoryGUI.GUIManager;
 import org.owleebr.professions.FoxCore.Utils.JsonUtils;
 import org.owleebr.professions.FoxFunctionalBlock.FunctionalBlocks.BlockManager;
 import org.owleebr.professions.FoxFunctionalBlock.FunctionalBlocks.Blocks.FuncBlock;
+import org.owleebr.professions.JsonObjects.CTRecipe;
 import org.owleebr.professions.JsonObjects.Recipe;
+import org.owleebr.professions.JsonObjects.RecipeAnvil;
+import org.owleebr.professions.JsonObjects.RecipeSW;
 import org.owleebr.professions.Listeners.ListenerManager;
 import org.owleebr.professions.Listeners.events.HoverManager;
 import java.io.File;
@@ -54,11 +56,29 @@ public class Main extends JavaPlugin {
     @AFile
     File Recipes;
 
+    @AFile
+    File CTRecipes;
+
+    @AFile
+    File SWBRecipes;
+
+    @AFile
+    File AnvilRecipes;
+
     @AJFile(file = "Blocks")
     public static Map<String, Block> blockList = new HashMap<>();
 
     @AJFile(file = "Recipes")
     public static Map<String, Recipe> recipeList = new HashMap<>();
+
+    @AJFile(file = "CTRecipes")
+    public static Map<String, CTRecipe> ctRecipeList = new HashMap<>();
+
+    @AJFile(file = "SWBRecipes")
+    public static Map<String, RecipeSW> SWBRecipeList = new HashMap<>();
+
+    @AJFile(file = "AnvilRecipes")
+    public static Map<String, RecipeAnvil> AnvilRecipeList = new HashMap<>();
 
 
     public static BlockManager blockManager = new BlockManager();
@@ -68,18 +88,20 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         getDataFolder().mkdirs();
         saveDefaultConfig();
+        //JSON файлы
         Blocks = new File(getDataFolder(), "Blocks.json");
         Recipes = new File(getDataFolder(), "Recipes.json");
+        CTRecipes = new File(getDataFolder(), "CTRecipes.json");
+        SWBRecipes = new File(getDataFolder(), "RecipeSW.json");
+        AnvilRecipes =  new File(getDataFolder(), "RecipeAnvil.json");
+
+
         dbFile = new File(getDataFolder(), "database.db");
 
         init();
         ListenerManager.registerListeners();
         CommandManager.registerCommands();
         HoverManager.registEvent();
-        for (Recipe r : recipeList.values()) {
-            Bukkit.getLogger().info("Recipe: " + r.getItems().get(0).getDisplayName() + " " + r.getItems().get(0).getAmount());
-        }
-
     }
 
 
@@ -188,6 +210,11 @@ public class Main extends JavaPlugin {
             stmt.execute(sqlm);
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+
+        for (CTRecipe recipe : ctRecipeList.values()) {
+            Bukkit.getLogger().info("TST");
+            Bukkit.addRecipe(recipe.getRecipe());
         }
     }
 

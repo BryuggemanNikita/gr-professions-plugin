@@ -40,7 +40,7 @@ public class OpenCINV implements CommandExecutor {
                                 List<String> items = getItemBlock.getBlocksNames();
                                 for (String itemname : items) {
                                     Button button = new Button.Builder()
-                                        .setItm(getItemBlock.getCustomItemBlock(itemname), ChatColor.RESET + "" + ChatColor.GOLD + itemname, "")
+                                        .setItm(getItemBlock.getCustomItemBlock(itemname), ChatColor.RESET + "" + ChatColor.GOLD + getItemBlock.getCustomItemBlock(itemname).getItemMeta().getDisplayName(), "")
                                         .addClick(ClickType.LEFT_CLICK, ChatColor.GRAY + "Получить предмет", new Runnable() {
                                             @Override
                                             public void run() {

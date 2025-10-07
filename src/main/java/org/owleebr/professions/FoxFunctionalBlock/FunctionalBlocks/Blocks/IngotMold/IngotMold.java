@@ -63,20 +63,22 @@ public class IngotMold extends FuncBlock {
                     if (input == null && output == null){
                         ItemStack cruc = hand.getPersistentDataContainer().get(Keys.input,
                             DataType.ITEM_STACK);
-                        input = cruc.getPersistentDataContainer().get(Keys.outputItem, DataType.ITEM_STACK);
-                        cruc.editMeta(m ->{
-                           m.getPersistentDataContainer().remove(Keys.outputItem);
-                        });
-                        player.getInventory().addItem(cruc);
-                        hand.editMeta(m ->{
-                           m.lore(new ArrayList<>());
-                           m.removeEnchantments();
-                           m.setDisplayName(ChatColor.RESET + "Щипцы");
-                           m.getPersistentDataContainer().remove(Keys.input);
-                        });
-                        player.setItemInHand(hand);
-                        CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
-                        data.set(MoldKeys.input, DataType.ITEM_STACK, input);
+                        if (cruc.getPersistentDataContainer().has(Keys.outputItem)){
+                            input = cruc.getPersistentDataContainer().get(Keys.outputItem, DataType.ITEM_STACK);
+                            cruc.editMeta(m ->{
+                                m.getPersistentDataContainer().remove(Keys.outputItem);
+                            });
+                            player.getInventory().addItem(cruc);
+                            hand.editMeta(m ->{
+                                m.lore(new ArrayList<>());
+                                m.removeEnchantments();
+                                m.setDisplayName(ChatColor.RESET + "Щипцы");
+                                m.getPersistentDataContainer().remove(Keys.input);
+                            });
+                            player.setItemInHand(hand);
+                            CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
+                            data.set(MoldKeys.input, DataType.ITEM_STACK, input);
+                        }
                     }
                 }
             }else if (output != null){

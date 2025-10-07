@@ -1,16 +1,16 @@
 package org.owleebr.professions.JsonObjects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Recipe {
+public class RecipeAnvil {
     public List<String> input;
     public String output;
-    public int time;
-    public int temp;
-    public int range;
+    public Integer hits;
+    public Integer level;
 
     @JsonIgnore
     public List<ItemStack> getItems(){
@@ -22,11 +22,11 @@ public class Recipe {
                 itm.setAmount(Integer.parseInt(strings[1]));
                 items.add(itm);
             }else if (strings[0].equalsIgnoreCase("Iron_Sword_Blank")){
-                ItemStack itm = JSUtils.getIron_Sword_Blank(false);
+                ItemStack itm = JSUtils.getIron_Sword_Blank(true);
                 itm.setAmount(Integer.parseInt(strings[1]));
                 items.add(itm);
             }else if (strings[0].equalsIgnoreCase("Iron_Pomel_Sword")){
-                ItemStack itm = JSUtils.getIron_Pomel_Sword(false);
+                ItemStack itm = JSUtils.getIron_Pomel_Sword(true);
                 itm.setAmount(Integer.parseInt(strings[1]));
                 items.add(itm);
             }
@@ -52,4 +52,5 @@ public class Recipe {
         }
         return null;
     }
+
 }

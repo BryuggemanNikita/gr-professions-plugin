@@ -1,5 +1,6 @@
 package org.owleebr.professions.FoxCore.Utils;
 
+import com.sun.jna.platform.unix.solaris.LibKstat.KstatNamed.UNION.STR;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
@@ -45,6 +46,32 @@ public class MathUtils {
         }
 
         return rotation;
+    }
+
+    public static float getDegrees(String face) {
+        if (face == "West") {
+            return -90;
+        }else if (face == "East") {
+            return 90;
+        }else if (face == "South") {
+            return 180;
+        }else if (face == "North") {
+            return 0;
+        }
+        return 0;
+    }
+
+    public static float getDegreesForVec(String face) {
+        if (face == "West") {
+            return 90;
+        }else if (face == "East") {
+            return -90;
+        }else if (face == "South") {
+            return 0;
+        }else if (face == "North") {
+            return 180;
+        }
+        return 0;
     }
 
 }

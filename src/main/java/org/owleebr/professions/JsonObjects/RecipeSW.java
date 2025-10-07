@@ -5,12 +5,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Recipe {
+public class RecipeSW {
     public List<String> input;
     public String output;
-    public int time;
-    public int temp;
-    public int range;
 
     @JsonIgnore
     public List<ItemStack> getItems(){
@@ -42,11 +39,11 @@ public class Recipe {
             itm.setAmount(Integer.parseInt(strings[1]));
             return itm;
         }else if (strings[0].equalsIgnoreCase("Iron_Sword_Blank")){
-            ItemStack itm = JSUtils.getIron_Sword_Blank(true);
+            ItemStack itm = JSUtils.getIron_Sword_Blank(false);
             itm.setAmount(Integer.parseInt(strings[1]));
             return itm;
         }else if (strings[0].equalsIgnoreCase("Iron_Pomel_Sword")){
-            ItemStack itm = JSUtils.getIron_Pomel_Sword(true);
+            ItemStack itm = JSUtils.getIron_Pomel_Sword(false);
             itm.setAmount(Integer.parseInt(strings[1]));
             return itm;
         }

@@ -6,6 +6,7 @@ import com.mojang.math.Transformation;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -94,20 +95,26 @@ public class SmitingFurnace extends FuncBlock {
 
     @Override
     public void onClick(Player player, Action action) {
-        if (action.isRightClick() && player.isSneaking()) {
+        if (action.isRightClick()){
             if (Crucible != null) {
-                if (player.getItemInHand() == null || player.getItemInHand().getType() == Material.AIR) {
-                    if (!Crucible.getPersistentDataContainer().has(Keys.outputItem)) {
-                        player.getInventory().addItem(Crucible);
-                        Crucible = null;
-                        CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
-                        data.remove(FurKeys.CrucibleFur);
-                    }else {
-                        player.damage(3);
+                if ( player.isSneaking()) {
+                    if (player.getItemInHand() == null || player.getItemInHand().getType() == Material.AIR) {
+                        if (!Crucible.getPersistentDataContainer().has(Keys.outputItem)) {
+                            if (!Crucible.getPersistentDataContainer().getOrDefault(Keys.hot, PersistentDataType.BOOLEAN, false)) {
+                                player.getInventory().addItem(Crucible);
+                                Crucible = null;
+                                CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
+                                data.remove(FurKeys.CrucibleFur);
+                            }else {
+                                player.damage(3);
+                            }
+                        }else {
+                            player.damage(3);
+                        }
+                        return;
                     }
                 }
             }
-        }else if (action.isRightClick()){
             if (player.getItemInHand().getType().isFuel()) {
                 if (Fuel == null) {
                     if (player.isSneaking()) {
@@ -178,6 +185,13 @@ public class SmitingFurnace extends FuncBlock {
                     CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                     data.set(FurKeys.CrucibleFur, DataType.ITEM_STACK, Crucible);
                 }
+            }else if (player.getItemInHand().getPersistentDataContainer().has(Keys.hot)) {
+                if (Crucible == null) {
+                    Crucible = player.getItemInHand();
+                    player.setItemInHand(new ItemStack(Material.AIR));
+                    CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
+                    data.set(FurKeys.CrucibleFur, DataType.ITEM_STACK, Crucible);
+                }
             }else if (player.getItemInHand().getType().equals(Material.FLINT_AND_STEEL)) {
                 if (Fuel != null) {
                     isLit = true;
@@ -204,6 +218,23 @@ public class SmitingFurnace extends FuncBlock {
                             CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
                             data.remove(FurKeys.CrucibleFur);
                         }
+                    }else if (Crucible.getPersistentDataContainer().has(Keys.hot)) {
+                        ItemStack itm = player.getItemInHand();
+                        itm.editMeta(m ->{
+                            m.setDisplayName(ChatColor.RESET + "Щипцы с заготовкой");
+                            m.addEnchant(Enchantment.SMITE, 1, true);
+                            m.getPersistentDataContainer().set(Keys.input, DataType.ITEM_STACK, Crucible);
+                            Component c = Component.text(ChatColor.GRAY + "Содержит: ");
+                            c = c.append(Crucible.getItemMeta().displayName());
+                            c.color(TextColor.color(211, 211, 211));
+                            List<Component> components = new ArrayList<>();
+                            components.add(c);
+                            m.lore(components);
+                        });
+                        Crucible = null;
+                        player.setItemInHand(itm);
+                        CustomBlockData data = new CustomBlockData(BlockLocation.getBlock(), Main.getInstance());
+                        data.remove(FurKeys.CrucibleFur);
                     }
                 }
             }
@@ -284,34 +315,58 @@ public class SmitingFurnace extends FuncBlock {
                 }
             }
             if (Crucible != null){
-                List<ItemStack> items = Crucible.getPersistentDataContainer().get(Keys.Crucible,
-                    DataType.asList(DataType.ITEM_STACK));
-                if (Main.recipeList.values().stream().anyMatch(r -> r.getItems().equals(items))){
-                    Recipe recipe = Main.recipeList.values().stream().filter(r -> r.getItems().equals(items)).findFirst().get();
-                    if (!isCooking){
-                        timeCook = recipe.time;
-                        isCooking = true;
-                    }else {
-                        if (Math.abs(Temp - recipe.temp) <= recipe.range){
-                            if (timeCook == 0){
-                                items.clear();
-                                Crucible.editMeta(m ->{
-                                    String[] strings = recipe.output.split("\\*");
-                                    m.getPersistentDataContainer().set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), items);
-                                    ItemStack itm = new ItemStack(
-                                        Material.valueOf(strings[0].toUpperCase()));
-                                    itm.setAmount(Integer.parseInt(strings[1]));
-                                    m.getPersistentDataContainer().set(Keys.outputItem, DataType.ITEM_STACK, itm);
-                                });
-                                isCooking = false;
-                            }else {
-                                timeCook--;
-                            }
-                        }else {
+                if (Crucible.getPersistentDataContainer().has(Keys.Crucible)){
+                    List<ItemStack> items = Crucible.getPersistentDataContainer().get(Keys.Crucible,
+                        DataType.asList(DataType.ITEM_STACK));
+                    if (Main.recipeList.values().stream().anyMatch(r -> r.getItems().equals(items))){
+                        Recipe recipe = Main.recipeList.values().stream().filter(r -> r.getItems().equals(items)).findFirst().get();
+                        if (!isCooking){
                             timeCook = recipe.time;
+                            isCooking = true;
+                        }else {
+                            if (Math.abs(Temp - recipe.temp) <= recipe.range){
+                                if (timeCook == 0){
+                                    items.clear();
+                                    Crucible.editMeta(m ->{
+                                        String[] strings = recipe.output.split("\\*");
+                                        m.getPersistentDataContainer().set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), items);
+                                        ItemStack itm = new ItemStack(
+                                            Material.valueOf(strings[0].toUpperCase()));
+                                        itm.setAmount(Integer.parseInt(strings[1]));
+                                        m.getPersistentDataContainer().set(Keys.outputItem, DataType.ITEM_STACK, itm);
+                                    });
+                                    isCooking = false;
+                                }else {
+                                    timeCook--;
+                                }
+                            }else {
+                                timeCook = recipe.time;
+                            }
+                        }
+                    }
+                }else if (Crucible.getPersistentDataContainer().has(Keys.hot)){
+                    if (Crucible.getPersistentDataContainer().get(Keys.hot, PersistentDataType.BOOLEAN) == false ){
+                        if (Main.recipeList.values().stream().anyMatch(r -> r.getItems().contains(Crucible))){
+                            Recipe recipe = Main.recipeList.values().stream().filter(r -> r.getItems().contains(Crucible)).findFirst().get();
+                            if (!isCooking){
+                                timeCook = recipe.time;
+                                isCooking = true;
+                            }else {
+                                if (Math.abs(Temp - recipe.temp) <= recipe.range){
+                                    if (timeCook == 0){
+                                        Crucible = recipe.getOuItem();
+                                        isCooking = false;
+                                    }else {
+                                        timeCook--;
+                                    }
+                                }else {
+                                    timeCook = recipe.time;
+                                }
+                            }
                         }
                     }
                 }
+
             }
             if (SoundTime == 0){
                 SoundTime = 250;

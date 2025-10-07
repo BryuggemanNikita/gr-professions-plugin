@@ -12,4 +12,8 @@ public class Keys {
 
     public static NamespacedKey input = new NamespacedKey(Main.getInstance(), "input");
 
+    public static NamespacedKey hot = new NamespacedKey(Main.getInstance(), "hot");
+
+    public static NamespacedKey hammer = new NamespacedKey(Main.getInstance(), "hammer");
+
 }
