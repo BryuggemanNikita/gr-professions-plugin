@@ -24,10 +24,10 @@ public class GameUtils {
 
     static Vector getForwardVector(String face) {
         switch(face) {
-            case "North":  return new Vector(0, 0, -1);
-            case "South":  return new Vector(0, 0, 1);
-            case "East": return new Vector(1, 0, 0);
-            case "West": return new Vector(-1, 0, 0);
+            case "South":  return new Vector(0, 0, -1);
+            case "North":  return new Vector(0, 0, 1);
+            case "West": return new Vector(1, 0, 0);
+            case "East": return new Vector(-1, 0, 0);
         }
         return new Vector(0, 0, 0);
     }
@@ -35,10 +35,10 @@ public class GameUtils {
     // Получить вектор right (вправо) для стороны света
     static Vector getRightVector(String dir) {
         switch(dir) {
-            case "North": return new Vector(1, 0, 0);
-            case "South": return new Vector(-1, 0, 0);
-            case "East":   return new Vector(0, 0, 1);
-            case "West":   return new Vector(0, 0, -1);
+            case "South": return new Vector(1, 0, 0);
+            case "North": return new Vector(-1, 0, 0);
+            case "West":   return new Vector(0, 0, 1);
+            case "East":   return new Vector(0, 0, -1);
         }
         return new Vector(0, 0, 0);
     }

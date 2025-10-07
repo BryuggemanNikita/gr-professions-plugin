@@ -53,9 +53,9 @@ public class MathUtils {
             return -90;
         }else if (face == "East") {
             return 90;
-        }else if (face == "South") {
-            return 180;
         }else if (face == "North") {
+            return 180;
+        }else if (face == "South") {
             return 0;
         }
         return 0;

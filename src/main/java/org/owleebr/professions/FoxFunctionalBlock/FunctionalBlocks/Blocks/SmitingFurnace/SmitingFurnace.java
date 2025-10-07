@@ -374,7 +374,7 @@ public class SmitingFurnace extends FuncBlock {
             int chance = rnd.nextInt(100);
             if (chance > 50){
                 int count = rnd.nextInt(3) + 1;
-                Vector v = MathUtils.moveVector(new Vector(), -1f, -0.5f, face);
+                Vector v = MathUtils.moveVector(new Vector(), 1f, 0.5f, face);
                 Bukkit.getScheduler().runTask(Main.getInstance(), () ->{
                     BlockLocation.getWorld().spawnParticle(Particle.FLAME, BlockLocation.clone().add(DIR2.get(face)).add(0, 1, 0).add(v), count, 0.125, 0.0625, 0.125, 0.01);
                 });
@@ -394,7 +394,7 @@ public class SmitingFurnace extends FuncBlock {
         Location blockDisplay = BlockLocation.clone().add(DIR2.get(face)).add(0.5, 0.5, 0.5);
         final List<Integer> IDs = new ArrayList<>();
         if (Fuel != null){
-            Vector v = MathUtils.moveVector(new Vector(), -0.6f, 0, face);
+            Vector v = MathUtils.moveVector(new Vector(), 0.6f, 0, face);
             Quaternionf rotation = MathUtils.rotateWithQuaternion(face);
             int ID1 = SendPackets.showItemDisplay(player, blockDisplay.clone().add(v).add(0, 0.2, 0), Fuel, true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
             int ID2 = SendPackets.showTextDisplay(player, blockDisplay.clone().add(v).subtract(0, 0.4, 0), "" + Fuel.getAmount(), true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
@@ -415,7 +415,7 @@ public class SmitingFurnace extends FuncBlock {
             Location blockDisplay = BlockLocation.clone().add(DIR2.get(face)).add(0.5, 0.5, 0.5);
             IDs.clear();
             if (Fuel != null){
-                Vector v = MathUtils.moveVector(new Vector(), -0.6f, 0, face);
+                Vector v = MathUtils.moveVector(new Vector(), 0.6f, 0, face);
                 Quaternionf rotation = MathUtils.rotateWithQuaternion(face);
                 int ID1 = SendPackets.showItemDisplay(player, blockDisplay.clone().add(v).add(0, 0.2, 0), Fuel, true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
                 int ID2 = SendPackets.showTextDisplay(player, blockDisplay.clone().add(v).subtract(0, 0.4, 0), "" + Fuel.getAmount(), true, new Transformation(new Vector3f(), rotation, new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));

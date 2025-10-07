@@ -168,7 +168,7 @@ public class BlockPlaceUtil {
             }
         }
 
-        Vector v = MathUtils.moveVector(new Vector(), 1, 0, Direction);
+        Vector v = MathUtils.moveVector(new Vector(), -1, 0, Direction);
         Block block = location.clone().add(DIR2.get(Direction)).add(0, 2, 0).add(v).getBlock();
         block.setType(Material.RED_SHULKER_BOX);
         CustomBlockData data = new CustomBlockData(block, Main.getInstance());

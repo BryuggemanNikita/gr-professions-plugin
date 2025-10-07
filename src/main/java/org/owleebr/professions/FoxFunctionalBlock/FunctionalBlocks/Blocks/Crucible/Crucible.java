@@ -145,7 +145,7 @@ public class Crucible extends FuncBlock {
         String face = GameUtils.getFacingDirection(player);
         Location loc = BlockLocation.clone().add(0.5, 1.5, 0.5);
 
-        Vector v = MathUtils.moveVector(new Vector(), 0, -0.5f, face);
+        Vector v = MathUtils.moveVector(new Vector(), 0, 0.5f, face);
         final List<Integer> IDs = new ArrayList<>();
         int i = 0;
         for (ItemStack item : inventory) {
@@ -188,7 +188,7 @@ public class Crucible extends FuncBlock {
             String face = GameUtils.getFacingDirection(player);
             Location loc = BlockLocation.clone().add(0.5, 1.5, 0.5);
             int i = 0;
-            Vector v = MathUtils.moveVector(new Vector(), 0, -0.5f, face);
+            Vector v = MathUtils.moveVector(new Vector(), 0, 0.5f, face);
             for (ItemStack item : inventory) {
                 int z = i;
                 Vector v2 = v.clone();

@@ -83,7 +83,7 @@ public class Utils {
                 }
             }
         }
-        Vector v = MathUtils.moveVector(new Vector(), 1, 0, Face);
+        Vector v = MathUtils.moveVector(new Vector(), -1, 0, Face);
         Block blockc = block.getLocation().clone().add(DIR2.get(Face)).add(0, 2, 0).add(v).getBlock();
         if (blockc.getType() != Material.AIR){return false;}
         return true;
