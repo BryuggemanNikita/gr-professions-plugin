@@ -60,7 +60,7 @@ public class SmitingFurnace extends FuncBlock {
 
     int burnTime = Main.getInstance().getConfig().getInt("burnTime");; //время горения топлива
     int minBurnTemp = Main.getInstance().getConfig().getInt("minBurnTemp"); //минимальная температура печи
-    int CoolingTime = Main.getInstance().getConfig().getInt("CoolingTime"); //время остывания печи
+    int CoolingTime = 0; //время остывания печи
 
     int SoundTime = 250;
     int SmokeTime = 50;
@@ -299,20 +299,16 @@ public class SmitingFurnace extends FuncBlock {
                         data.remove(FurKeys.Fuel);
                         UpdateDisplays();
                     }
-                    burnTime = 500;
+                    burnTime = Main.getInstance().getConfig().getInt("burnTime");
                 }
             }else {
                 burnTime--;
             }
-            if (Temp < minBurnTemp){
-                Temp = minBurnTemp;
-            }else if (Temp > burnTime){
-                if (CoolingTime == 0){
-                    CoolingTime = 500;
-                    Temp = Math.min(Temp - 1, minBurnTemp);
-                }else {
-                    CoolingTime--;
-                }
+            if (CoolingTime == 0){
+                CoolingTime = Main.getInstance().getConfig().getInt("CoolingTime");;
+                Temp = Math.max(Temp - 1, minBurnTemp);
+            }else {
+                CoolingTime--;
             }
             if (Crucible != null){
                 if (Crucible.getPersistentDataContainer().has(Keys.Crucible)){
@@ -330,9 +326,7 @@ public class SmitingFurnace extends FuncBlock {
                                     Crucible.editMeta(m ->{
                                         String[] strings = recipe.output.split("\\*");
                                         m.getPersistentDataContainer().set(Keys.Crucible, DataType.asList(DataType.ITEM_STACK), items);
-                                        ItemStack itm = new ItemStack(
-                                            Material.valueOf(strings[0].toUpperCase()));
-                                        itm.setAmount(Integer.parseInt(strings[1]));
+                                        ItemStack itm = recipe.getOuItem();
                                         m.getPersistentDataContainer().set(Keys.outputItem, DataType.ITEM_STACK, itm);
                                     });
                                     isCooking = false;
